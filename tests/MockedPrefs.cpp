@@ -14,7 +14,7 @@
 
 #include <unordered_map>
 
-class MockedFileConfig final : public FileConfig
+class MockedFileConfig final : public wxConfigBase
 {
 public:
    void SetPath(const wxString& path) override
@@ -70,7 +70,7 @@ public:
 
    bool Flush(bool bCurrentOnly = false) override
    {
-      return false;
+      return true;
    }
 
    bool RenameEntry(const wxString& oldName, const wxString& newName)
@@ -156,10 +156,6 @@ public:
       return true;
    }
 
-   void Warn() override
-   {
-   }
-
 private:
    wxString mPath;
 
@@ -170,13 +166,11 @@ private:
 };
 
 MockedPrefs::MockedPrefs()
-    : mConfig { std::make_unique<MockedFileConfig>() }
 {
-   // MockedPrefs destructor will delete this object
-   gPrefs = mConfig.get();
+   InitPreferences(std::make_unique<MockedFileConfig>());
 }
 
 MockedPrefs::~MockedPrefs ()
 {
-   gPrefs = nullptr;
+   FinishPreferences();
 }

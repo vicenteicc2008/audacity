@@ -17,12 +17,11 @@
 #include "LabelDialog.h"
 
 #include <wx/defs.h>
+#include <wx/textfile.h>
 #include <wx/choice.h>
 #include <wx/dc.h>
 #include <wx/grid.h>
 #include <wx/scrolbar.h>
-#include <wx/settings.h>
-#include <wx/stattext.h>
 #include <wx/textdlg.h>
 
 #include "ShuttleGui.h"

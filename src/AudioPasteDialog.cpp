@@ -10,6 +10,7 @@
 
 #include "AudioPasteDialog.h"
 
+#include <wx/filename.h>
 #include <wx/sizer.h>
 #include <wx/checkbox.h>
 #include <wx/stattext.h>

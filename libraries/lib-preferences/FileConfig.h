@@ -12,39 +12,39 @@
 #define __AUDACITY_WIDGETS_FILECONFIG__
 
 #include <memory>
+#include <wx/confbase.h>
 
-#include <wx/defs.h>
-#include <wx/fileconf.h>
-#include "Identifier.h"
-
-class PREFERENCES_API FileConfig : public wxConfigBase
+///@brief Wraps wxConfigBase adding dirty flag that prevents extensive
+///redundant writes when wxConfigBase::Flush() is called. Replicates
+///wxConfigBase interface.
+///Requires another wxConfigBase instance that is used as an actual
+///storage (e.g. all write/reads are delegated to that object)
+//TODO: wxFileConfig already has dirty flag
+class PREFERENCES_API FileConfig final : public wxConfigBase
 {
 public:
-   FileConfig(const wxString& appName = wxEmptyString,
-              const wxString& vendorName = wxEmptyString,
-              const wxString& localFilename = wxEmptyString,
-              const wxString& globalFilename = wxEmptyString,
-              long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
-              const wxMBConv& conv = wxConvAuto());
-   void Init();
-   virtual ~FileConfig();
+   
+   FileConfig();
+   ~FileConfig() override;
 
-   virtual void SetPath(const wxString& strPath) wxOVERRIDE;
-   virtual const wxString& GetPath() const wxOVERRIDE;
-   virtual bool GetFirstGroup(wxString& str, long& lIndex) const wxOVERRIDE;
-   virtual bool GetNextGroup(wxString& str, long& lIndex) const wxOVERRIDE;
-   virtual bool GetFirstEntry(wxString& str, long& lIndex) const wxOVERRIDE;
-   virtual bool GetNextEntry(wxString& str, long& lIndex) const wxOVERRIDE;
-   virtual size_t GetNumberOfEntries(bool bRecursive = false) const wxOVERRIDE;
-   virtual size_t GetNumberOfGroups(bool bRecursive = false) const wxOVERRIDE;
-   virtual bool HasGroup(const wxString& strName) const wxOVERRIDE;
-   virtual bool HasEntry(const wxString& strName) const wxOVERRIDE;
-   virtual bool Flush(bool bCurrentOnly = false) wxOVERRIDE;
-   virtual bool RenameEntry(const wxString& oldName, const wxString& newName) wxOVERRIDE;
-   virtual bool RenameGroup(const wxString& oldName, const wxString& newName) wxOVERRIDE;
-   virtual bool DeleteEntry(const wxString& key, bool bDeleteGroupIfEmpty = true) wxOVERRIDE;
-   virtual bool DeleteGroup(const wxString& key) wxOVERRIDE;
-   virtual bool DeleteAll() wxOVERRIDE;
+   void SetImpl(std::unique_ptr<wxConfigBase> impl);
+
+   void SetPath(const wxString& strPath) override;
+   const wxString& GetPath() const override;
+   bool GetFirstGroup(wxString& str, long& lIndex) const override;
+   bool GetNextGroup(wxString& str, long& lIndex) const override;
+   bool GetFirstEntry(wxString& str, long& lIndex) const override;
+   bool GetNextEntry(wxString& str, long& lIndex) const override;
+   size_t GetNumberOfEntries(bool bRecursive = false) const override;
+   size_t GetNumberOfGroups(bool bRecursive = false) const override;
+   bool HasGroup(const wxString& strName) const override;
+   bool HasEntry(const wxString& strName) const override;
+   bool Flush(bool bCurrentOnly = false) override;
+   bool RenameEntry(const wxString& oldName, const wxString& newName) override;
+   bool RenameGroup(const wxString& oldName, const wxString& newName) override;
+   bool DeleteEntry(const wxString& key, bool bDeleteGroupIfEmpty = true) override;
+   bool DeleteGroup(const wxString& key) override;
+   bool DeleteAll() override;
 
    // Set and Get values of the version major/minor/micro keys in audacity.cfg when Audacity first opens
    void SetVersionKeysInit( int major, int minor, int micro)
@@ -61,34 +61,21 @@ public:
    }
 
 protected:
-   virtual bool DoReadString(const wxString& key, wxString *pStr) const wxOVERRIDE;
-   virtual bool DoReadLong(const wxString& key, long *pl) const wxOVERRIDE;
+
+   bool DoReadString(const wxString& key, wxString *pStr) const override;
+   bool DoReadLong(const wxString& key, long *pl) const override;
 #if wxUSE_BASE64
-   virtual bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const wxOVERRIDE;
+   bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const override;
 #endif // wxUSE_BASE64
 
-   virtual bool DoWriteString(const wxString& key, const wxString& szValue) wxOVERRIDE;
-   virtual bool DoWriteLong(const wxString& key, long lValue) wxOVERRIDE;
+   bool DoWriteString(const wxString& key, const wxString& szValue) override;
+   bool DoWriteLong(const wxString& key, long lValue) override;
 #if wxUSE_BASE64
-   virtual bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf) wxOVERRIDE;
+   bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf) override;
 #endif // wxUSE_BASE64
-
-protected:
-   //! Override to notify the user of error conditions involving writability of
-   //! config files.  Default implementation does nothing
-   virtual void Warn();
-
-   const FilePath &GetFilePath() const { return mLocalFilename; }
 
 private:
-   const wxString mAppName;
-   const wxString mVendorName;
-   const wxString mLocalFilename;
-   const wxString mGlobalFilename;
-   const long mStyle;
-   std::unique_ptr<wxMBConv> mConv;
-
-   std::unique_ptr<wxFileConfig> mConfig;
+   std::unique_ptr<wxConfigBase> mImpl;
 
    // values of the version major/minor/micro keys in audacity.cfg
    // when Audacity first opens
@@ -96,7 +83,7 @@ private:
    int mVersionMinorKeyInit{};
    int mVersionMicroKeyInit{};
 
-   bool mDirty;
+   bool mDirty{false};
 };
 
 #endif

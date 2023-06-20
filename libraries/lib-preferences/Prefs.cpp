@@ -197,10 +197,15 @@ static void CopyEntriesRecursive(wxString path, wxConfigBase *src, wxConfigBase 
 }
 #endif
 
-void InitPreferences( std::unique_ptr<FileConfig> uPrefs )
+void InitPreferences( std::unique_ptr<wxConfigBase> uPrefs )
 {
-   gPrefs = uPrefs.get();
-   ugPrefs = std::move(uPrefs);
+   {
+      auto config = std::make_unique<FileConfig>();
+      config->SetImpl(std::move(uPrefs));
+      gPrefs = config.get();
+      std::swap(config, ugPrefs);
+   }
+
    wxConfigBase::Set(gPrefs);
    PrefsListener::Broadcast();
 }

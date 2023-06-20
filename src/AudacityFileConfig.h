@@ -13,36 +13,34 @@ Paul Licameli split from Prefs.h
 #define __AUDACITY_FILE_CONFIG__
 
 #include <memory>
-#include "FileConfig.h" // to inherit
+#include <wx/fileconf.h>
 
-/// \brief Our own specialisation of FileConfig.
-class AUDACITY_DLL_API AudacityFileConfig final : public FileConfig
+/// \brief Our own specialisation of wxFileConfig.
+class AUDACITY_DLL_API AudacityFileConfig final : public wxFileConfig
 {
+   AudacityFileConfig(const wxString& appName = wxEmptyString,
+                      const wxString& vendorName = wxEmptyString,
+                      const wxString& localFilename = wxEmptyString,
+                      const wxString& globalFilename = wxEmptyString,
+                      long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
+                      const wxMBConv& conv = wxConvAuto());
 public:
-   //! Require a call to this factory, to guarantee proper two-phase initialization
-   static std::unique_ptr<AudacityFileConfig> Create(
-      const wxString& appName = {},
-      const wxString& vendorName = {},
-      const wxString& localFilename = {},
-      const wxString& globalFilename = {},
-      long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
-      const wxMBConv& conv = wxConvAuto()
-   );
+
+   static
+   std::unique_ptr<AudacityFileConfig> Create(const wxString& appName = wxEmptyString,
+                                              const wxString& vendorName = wxEmptyString,
+                                              const wxString& localFilename = wxEmptyString,
+                                              const wxString& globalFilename = wxEmptyString,
+                                              long style = wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE,
+                                              const wxMBConv& conv = wxConvAuto());
 
    ~AudacityFileConfig() override;
 
-protected:
-   void Warn() override;
+   bool Flush(bool bCurrentOnly) override;
 
 private:
-   //! Disallow direct constructor call, because a two-phase initialization is required
-   AudacityFileConfig(
-      const wxString& appName,
-      const wxString& vendorName,
-      const wxString& localFilename,
-      const wxString& globalFilename,
-      long style,
-      const wxMBConv& conv
-   );
+   const wxString mLocalFilename;
+   const wxString mGlobalFilename;
 };
+
 #endif

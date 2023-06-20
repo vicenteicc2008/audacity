@@ -21,11 +21,12 @@
 #include <wx/app.h>
 #include <wx/filename.h>
 #include <wx/ffile.h>
+#include <wx/textfile.h>
 
 #include <string>
 #include <string_view>
 
-#include "MemoryX.h"
+
 #include "Prefs.h"
 #include "FileNames.h"
 

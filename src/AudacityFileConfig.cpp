@@ -16,41 +16,13 @@ Paul Licameli split from Prefs.cpp
 #include "ShuttleGui.h"
 #include "../images/Help.xpm"
 
-#include <wx/app.h>
 #include <wx/bmpbuttn.h>
 #include <wx/sizer.h>
+#include <wx/wfstream.h>
 
-AudacityFileConfig::AudacityFileConfig(
-   const wxString& appName,
-   const wxString& vendorName,
-   const wxString& localFilename,
-   const wxString& globalFilename,
-   long style,
-   const wxMBConv& conv
-)
-: FileConfig{ appName, vendorName, localFilename, globalFilename, style, conv }
-{}
-
-AudacityFileConfig::~AudacityFileConfig() = default;
-
-std::unique_ptr<AudacityFileConfig> AudacityFileConfig::Create(
-   const wxString& appName,
-   const wxString& vendorName,
-   const wxString& localFilename,
-   const wxString& globalFilename,
-   long style,
-   const wxMBConv& conv
-)
+namespace
 {
-   // Private ctor means make_unique can't compile, so this verbosity:
-   auto result = std::unique_ptr<AudacityFileConfig>{
-      safenew AudacityFileConfig{
-         appName, vendorName, localFilename, globalFilename, style, conv } };
-   result->Init();
-   return result;
-}
-
-void AudacityFileConfig::Warn()
+void ShowWarn(const wxString& filepath)
 {
    wxDialogWrapper dlg(nullptr, wxID_ANY, XO("Audacity Configuration Error"));
 
@@ -74,7 +46,7 @@ void AudacityFileConfig::Warn()
                "You can attempt to correct the issue and then click \"Retry\" to continue.\n\n"
                "If you choose to \"Quit Audacity\", your project may be left in an unsaved "
                "state which will be recovered the next time you open it.")
-            .Format(GetFilePath()),
+            .Format(filepath),
             false,
             500);
       }
@@ -129,4 +101,105 @@ void AudacityFileConfig::Warn()
    }
 
    dlg.Unbind(wxEVT_BUTTON, onButton);
+}
+
+}
+
+std::unique_ptr<AudacityFileConfig>
+AudacityFileConfig::Create(const wxString& appName,
+                           const wxString& vendorName,
+                           const wxString& localFilename,
+                           const wxString& globalFilename,
+                           long style,
+                           const wxMBConv& conv)
+{
+   while (true)
+   {
+      auto config = std::unique_ptr<AudacityFileConfig>(safenew AudacityFileConfig(
+         appName, vendorName, localFilename, globalFilename, style, conv));
+
+      // Prevent wxFileConfig from attempting a Flush() during object deletion. This happens
+      // because we don't use the wxFileConfig::Flush() method and so the wxFileConfig dirty
+      // flag never gets reset. During deletion, the dirty flag is checked and a Flush()
+      // performed. This can (and probably will) create bogus temporary files.
+      config->DisableAutoSave();
+
+      bool canRead = false;
+      bool canWrite = false;
+      int fd;
+
+      fd = wxOpen(localFilename, O_RDONLY, S_IREAD);
+      if (fd != -1 || errno == ENOENT)
+      {
+         canRead = true;
+         if (fd != -1)
+         {
+            wxClose(fd);
+         }
+      }
+
+      fd = wxOpen(localFilename, O_WRONLY | O_CREAT, S_IWRITE);
+      if (fd != -1)
+      {
+         canWrite = true;
+         wxClose(fd);
+      }
+
+      if (canRead && canWrite)
+         return config;
+
+      ShowWarn(localFilename);
+   }
+}
+
+AudacityFileConfig::AudacityFileConfig(const wxString& appName,
+                                       const wxString& vendorName,
+                                       const wxString& localFilename,
+                                       const wxString& globalFilename,
+                                       long style,
+                                       const wxMBConv& conv)
+   : wxFileConfig(appName, vendorName, localFilename, globalFilename, style, conv)
+   , mLocalFilename(localFilename)
+   , mGlobalFilename(globalFilename)
+{
+   
+}
+
+AudacityFileConfig::~AudacityFileConfig() = default;
+
+
+bool AudacityFileConfig::Flush(bool)
+{
+   while (true)
+   {
+      FilePath backup = mLocalFilename + ".bkp";
+
+      if (!wxFileExists(backup) || (wxRemove(backup) == 0))
+      {
+         if (!wxFileExists(mLocalFilename) || (wxRename(mLocalFilename, backup) == 0))
+         {
+            wxFileOutputStream stream(mLocalFilename);
+            if (stream.IsOk())
+            {
+               if (Save(stream))
+               {
+                  stream.Sync();
+                  if (stream.IsOk() && stream.Close())
+                  {
+                     if (!wxFileExists(backup) || (wxRemove(backup) == 0))
+                        return true;
+                  }
+               }
+            }
+
+            if (wxFileExists(backup))
+            {
+               wxRemove(mLocalFilename);
+               wxRename(backup, mLocalFilename);
+            }
+         }
+      }
+
+      ShowWarn(mLocalFilename);
+   }
 }

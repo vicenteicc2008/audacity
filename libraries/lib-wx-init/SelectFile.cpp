@@ -13,6 +13,8 @@
 #include "FileDialog/FileDialog.h"
 #include "AudacityMessageBox.h"
 
+#include <wx/filename.h>
+
 FilePath
 SelectFile(FileNames::Operation op,
    const TranslatableString& message,

@@ -1442,7 +1442,10 @@ bool AudacityApp::InitPart2()
 
    // Initialize the PluginManager
    PluginManager::Get().Initialize( [](const FilePath &localFileName){
-      return AudacityFileConfig::Create({}, {}, localFileName); } );
+      auto config = std::make_unique<FileConfig>();
+      config->SetImpl(AudacityFileConfig::Create({}, {}, localFileName));
+      return config;
+   });
 
    // Parse command line and handle options that might require
    // immediate exit...no need to initialize all of the audio

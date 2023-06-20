@@ -59,7 +59,6 @@ and use it for toolbar and window layouts too.
 
 #include <map>
 
-#include <wx/wxprec.h>
 #include <wx/brush.h>
 #include <wx/pen.h>
 #include <wx/file.h>
@@ -68,6 +67,8 @@ and use it for toolbar and window layouts too.
 #include <wx/wfstream.h>
 #include <wx/mstream.h>
 #include <wx/settings.h>
+#include <wx/filename.h>
+#include <wx/textfile.h>
 #include <regex>
 
 #include "AllThemeResources.h"

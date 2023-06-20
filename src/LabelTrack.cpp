@@ -36,6 +36,7 @@ for drawing different aspects of the label and its text box.
 #include <float.h>
 
 #include <wx/log.h>
+#include <wx/textfile.h>
 #include <wx/tokenzr.h>
 
 #include "Prefs.h"

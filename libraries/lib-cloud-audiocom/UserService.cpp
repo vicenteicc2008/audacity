@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <wx/file.h>
+#include <wx/filename.h>
 
 #include <rapidjson/document.h>
 

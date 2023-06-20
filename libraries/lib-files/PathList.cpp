@@ -14,6 +14,7 @@
 #include "TempDirectory.h"
 #include <wx/stdpaths.h>
 #include <wx/utils.h>
+#include <wx/filename.h>
 
 void FileNames::InitializePathList()
 {

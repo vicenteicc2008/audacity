@@ -17,6 +17,7 @@
 #include "widgets/Grid.h"
 #include "HelpSystem.h"
 #include "XMLFileReader.h"
+#include <wx/textfile.h>
 #include <wx/combobox.h>
 #include <wx/display.h>
 #include <wx/scrolbar.h>

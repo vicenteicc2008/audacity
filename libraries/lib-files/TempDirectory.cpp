@@ -10,6 +10,8 @@
 
 #include "TempDirectory.h"
 
+#include <wx/filename.h>
+
 #include "FileNames.h"
 #include "BasicUI.h"
 

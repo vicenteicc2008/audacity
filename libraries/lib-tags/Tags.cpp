@@ -38,6 +38,7 @@
 
 #include <wx/setup.h> // for wxUSE_* macros
 #include <wx/log.h>
+#include <wx/textfile.h>
 
 #ifndef WX_PRECOMP
 // Include your minimal set of headers here, or wx.h

@@ -135,7 +135,7 @@ namespace Registry {
       GroupItemBase( const Identifier &internalName, BaseItemPtrs &&items_ )
          : BaseItem{ internalName }, items{ std::move( items_ ) }
       {}
-      GroupItemBase( const GroupItemBase& ) PROHIBITED;
+      GroupItemBase( const GroupItemBase& ) = delete;
       ~GroupItemBase() override = 0;
 
       //! Choose treatment of the children of the group when merging trees
