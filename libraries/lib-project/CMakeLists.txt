@@ -19,10 +19,23 @@ set( SOURCES
    ProjectStatus.cpp
    ProjectStatus.h
 )
+
 set( LIBRARIES
    lib-registries-interface
    lib-xml-interface
 )
+
+
+if(${_OPT}enable_experimental_qt_support)
+   list(APPEND SOURCES
+      ProjectQMLEnvironment.cpp
+      ProjectQMLEnvironment.h
+   )
+   list(APPEND LIBRARIES
+      PUBLIC Qt6::Qml
+   )
+endif()
+
 audacity_library( lib-project "${SOURCES}" "${LIBRARIES}"
    "" ""
 )
