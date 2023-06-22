@@ -1,5 +1,6 @@
-#include <QFontDatabase>
-#include <QGuiApplication>
+#include <QtGui/QFontDatabase>
+#include <QtGui/QGuiApplication>
+
 #include "ApplicationConfiguration.h"
 
 ApplicationConfiguration::ApplicationConfiguration()

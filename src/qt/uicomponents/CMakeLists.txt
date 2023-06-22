@@ -1,10 +1,5 @@
 set(MODULE_NAME uicomponents)
 
-qt_add_library(${MODULE_NAME} STATIC)
-
-set_target_properties(${MODULE_NAME} PROPERTIES AUTOMOC ON)
-target_link_libraries(${MODULE_NAME} PRIVATE Qt6::Quick)
-
 set(MODULE_SOURCES
    ApplicationConfiguration.cpp
    ApplicationConfiguration.h
@@ -28,7 +23,6 @@ set(MODULE_QML_SOURCES
    qml/StyledIconLabel.qml
    qml/StyledSlider.qml
    qml/StyledTextLabel.qml
-   qml/TimeControl.qml
    qml/TrackVolumeMeter.qml
    qml/ToolbarGrip.qml
    qml/ToolbarSeparator.qml
@@ -40,6 +34,7 @@ set(MODULE_QML_SOURCES
 qt_add_qml_module(${MODULE_NAME}
    URI "Audacity.UiComponents"
    VERSION 1.0
+   STATIC
    RESOURCE_PREFIX /${MODULE_NAME}
    DEPENDENCIES
       QtQuick
@@ -50,3 +45,5 @@ qt_add_qml_module(${MODULE_NAME}
    NO_LINT
 )
 
+organize_source( "${CMAKE_CURRENT_SOURCE_DIR}" "" "${MODULE_SOURCES}" )
+organize_source( "${CMAKE_CURRENT_SOURCE_DIR}" "" "${MODULE_QML_SOURCES}" )
