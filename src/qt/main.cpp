@@ -1,28 +1,50 @@
 /*  SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include <QtCore/QDebug>
-#include <QtQml/QQmlApplicationEngine>
 #include <QtWidgets/QApplication>
+
+#include "AudacityQtConfig.h"
+#include "AudioIO.h"
+#include "Prefs.h"
+#include "Project.h"
+#include "ProjectQMLEnvironment.h"
+
 #include "uicomponents/ApplicationConfiguration.h"
 
-int main(int argc, char *argv[])
+std::shared_ptr<AudacityProject> CreateProject()
 {
-   QGuiApplication app(argc, argv);
-   ApplicationConfiguration appConfig;
+   static ApplicationConfiguration appConfig;
 
-   QQmlApplicationEngine engine;
+   auto project = AudacityProject::Create();
+
+   auto& engine = ProjectQMLEnvironment::Get(*project).GetEngine();
    engine.addImportPath(":/uicomponents");
-
    engine.setInitialProperties({
-      { "appConfig", QVariant::fromValue(&appConfig) }
+      { "appConfig", QVariant::fromValue(&appConfig) },
    });
    engine.load("qrc:/qml/main.qml");
 
    if (engine.rootObjects().isEmpty())
    {
       qDebug() << "Unable to load main.qml";
-      return -1;
+      return {};
    }
 
-   return app.exec();
+   return project;
+}
+
+int main(int argc, char *argv[])
+{
+   QGuiApplication app(argc, argv);
+
+   std::vector<std::shared_ptr<AudacityProject>> projects;
+
+   InitPreferences(std::make_unique<AudacityQtConfig>());
+   AudioIO::Init();
+
+   if(auto project = CreateProject())
+      projects.push_back(project);
+
+   if(!projects.empty())
+      return app.exec();
+   return -1;
 }

@@ -4,6 +4,7 @@ set(QAUDACITY ${CMAKE_PROJECT_NAME})
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 
 set(SOURCES
+   AudacityQtConfig.h
    main.cpp
    EditToolbarHandler.cpp
    EditToolbarHandler.h
@@ -23,6 +24,7 @@ qt_add_resources(QT_RESOURCES
 )
 
 add_subdirectory(uicomponents)
+add_subdirectory(numeric-formats)
 
 qt_add_executable(${QAUDACITY} ${SOURCES} ${QT_RESOURCES} MANUAL_FINALIZATION)
 
@@ -46,6 +48,7 @@ qt_add_qml_module(
    DEPENDENCIES
       QtQuick
       Audacity.UiComponents
+      Audacity.NumericFormats
 	QML_FILES
 		${QML_SOURCES}
    NO_LINT
@@ -81,7 +84,19 @@ endif()
 
 target_compile_definitions( ${QAUDACITY} PRIVATE $<$<CONFIG:Debug>:QT_QML_DEBUG> )
 target_link_libraries( ${QAUDACITY} PUBLIC ${AUDACITY_LIBRARIES} )
-target_link_libraries( ${QAUDACITY} PRIVATE Qt6::Core Qt6::Gui Qt6::Quick kddockwidgets::kddockwidgets uicomponentsplugin)
+target_link_libraries(
+   ${QAUDACITY}
+   PRIVATE
+      Qt6::Core
+      Qt6::Gui
+      Qt6::Quick
+      kddockwidgets::kddockwidgets
+      uicomponentsplugin
+      numeric-formatsplugin
+      lib-project
+      lib-preferences
+      lib-audio-io
+      lib-numeric-formats)
 
 qt_finalize_target(${QAUDACITY})
 
